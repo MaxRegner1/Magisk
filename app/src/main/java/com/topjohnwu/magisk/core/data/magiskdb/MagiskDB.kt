@@ -1,19 +1,18 @@
-package com.topjohnwu.magisk.core.data.magiskdb
+package com.example.myapp.data.database
 
-import com.topjohnwu.magisk.core.ktx.await
-import com.topjohnwu.superuser.Shell
-import kotlinx.coroutines.Dispatchers
+import com.example.myapp.data.network.NetworkClient
+import com.example.myapp.util.coroutines.DispatcherProvider
 import kotlinx.coroutines.withContext
 
-open class MagiskDB {
+open class MyAppDatabase {
 
-    suspend fun <R> exec(
+    suspend fun <R> executeQuery(
         query: String,
         mapper: suspend (Map<String, String>) -> R
     ): List<R> {
-        return withContext(Dispatchers.IO) {
-            val out = Shell.cmd("magisk --sqlite '$query'").await().out
-            out.map { line ->
+        return withContext(DispatcherProvider.IO) {
+            val result = NetworkClient.sendRequest("myapp --db '$query'").await().result
+            result.map { line ->
                 line.split("\\|".toRegex())
                     .map { it.split("=", limit = 2) }
                     .filter { it.size == 2 }
@@ -23,8 +22,8 @@ open class MagiskDB {
         }
     }
 
-    suspend inline fun exec(query: String) {
-        exec(query) {}
+    suspend inline fun executeQuery(query: String) {
+        executeQuery(query) {}
     }
 
     fun Map<String, Any>.toQuery(): String {
