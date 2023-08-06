@@ -1,4 +1,4 @@
-package com.topjohnwu.magisk.core.base
+package com.example.myapp.core.base
 
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.Manifest.permission.REQUEST_INSTALL_PACKAGES
@@ -16,12 +16,12 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
-import com.topjohnwu.magisk.R
-import com.topjohnwu.magisk.core.isRunningAsStub
-import com.topjohnwu.magisk.core.ktx.reflectField
-import com.topjohnwu.magisk.core.ktx.toast
-import com.topjohnwu.magisk.core.utils.RequestInstall
-import com.topjohnwu.magisk.core.wrap
+import com.example.myapp.R
+import com.example.myapp.core.isRunningAsStub
+import com.example.myapp.core.ktx.reflectField
+import com.example.myapp.core.ktx.toast
+import com.example.myapp.core.utils.RequestInstall
+import com.example.myapp.core.wrap
 
 interface ContentResultCallback: ActivityResultCallback<Uri>, Parcelable {
     fun onActivityLaunch() {}
@@ -65,7 +65,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (isRunningAsStub) {
-            // Overwrite private members to avoid nasty "false" stack traces being logged
+            // Overwrite private members to avoid misleading "false" stack traces being logged
             val delegate = delegate
             val clz = delegate.javaClass
             clz.reflectField("mActivityHandlesConfigFlagsChecked").set(delegate, true)
@@ -85,13 +85,13 @@ abstract class BaseActivity : AppCompatActivity() {
     fun withPermission(permission: String, callback: (Boolean) -> Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
             permission == WRITE_EXTERNAL_STORAGE) {
-            // We do not need external rw on R+
+            // We do not need external read/write permission on Android R+
             callback(true)
             return
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
             permission == POST_NOTIFICATIONS) {
-            // All apps have notification permissions before T
+            // All apps have notification permissions before Android T
             callback(true)
             return
         }
