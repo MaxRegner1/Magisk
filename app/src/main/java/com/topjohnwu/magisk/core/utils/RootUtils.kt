@@ -1,4 +1,4 @@
-package com.topjohnwu.magisk.core.utils
+package com.example.myapp.utils
 
 import android.app.ActivityManager
 import android.content.ComponentName
@@ -7,11 +7,11 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.system.Os
 import androidx.core.content.getSystemService
-import com.topjohnwu.magisk.core.Info
-import com.topjohnwu.superuser.Shell
-import com.topjohnwu.superuser.ShellUtils
-import com.topjohnwu.superuser.ipc.RootService
-import com.topjohnwu.superuser.nio.FileSystemManager
+import com.example.myapp.Info
+import com.example.myapp.Shell
+import com.example.myapp.ShellUtils
+import com.example.myapp.ipc.RootService
+import com.example.myapp.nio.FileSystemManager
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.locks.AbstractQueuedSynchronizer
@@ -19,18 +19,18 @@ import java.util.concurrent.locks.AbstractQueuedSynchronizer
 class RootUtils(stub: Any?) : RootService() {
 
     private val className: String = stub?.javaClass?.name ?: javaClass.name
-    private lateinit var am: ActivityManager
+    private lateinit var activityManager: ActivityManager
 
     constructor() : this(null) {
         Timber.plant(object : Timber.DebugTree() {
             override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                super.log(priority, "Magisk", message, t)
+                super.log(priority, "MyApp", message, t)
             }
         })
     }
 
     override fun onCreate() {
-        am = getSystemService()!!
+        activityManager = getSystemService()!!
     }
 
     override fun getComponentName(): ComponentName {
@@ -48,21 +48,21 @@ class RootUtils(stub: Any?) : RootService() {
         return try {
             block()
         } catch (e: Throwable) {
-            // The process died unexpectedly
+            // The process terminated unexpectedly
             Timber.e(e)
             default
         }
     }
 
     private fun getAppProcessImpl(_pid: Int): ActivityManager.RunningAppProcessInfo? {
-        val procList = am.runningAppProcesses
+        val processList = activityManager.runningAppProcesses
         var pid = _pid
         while (pid > 1) {
-            val proc = procList.find { it.pid == pid }
-            if (proc != null)
-                return proc
+            val process = processList.find { it.pid == pid }
+            if (process != null)
+                return process
 
-            // Stop find when root process
+            // Stop searching when root process is found
             if (Os.stat("/proc/$pid").st_uid == 0) {
                 return null
             }
